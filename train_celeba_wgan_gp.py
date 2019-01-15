@@ -94,6 +94,8 @@ writer = tensorboardX.SummaryWriter('./summaries/celeba_wgan_gp')
 z_sample = Variable(torch.randn(100, z_dim))
 z_sample = utils.cuda(z_sample)
 for epoch in range(start_epoch, epochs):
+    d_count, g_count = 0, 0
+    dl, gl = 0.0, 0.0
     for i, (imgs, _) in enumerate(data_loader):
         # step
         step = epoch * len(data_loader) + i + 1
@@ -120,6 +122,7 @@ for epoch in range(start_epoch, epochs):
         D.zero_grad()
         d_loss.backward()
         d_optimizer.step()
+        dl += d_loss.data.cpu().numpy()
 
         writer.add_scalar('D/wd', wd.data.cpu().numpy(), global_step=step)
         writer.add_scalar('D/gp', gp.data.cpu().numpy(), global_step=step)
@@ -135,7 +138,8 @@ for epoch in range(start_epoch, epochs):
             G.zero_grad()
             g_loss.backward()
             g_optimizer.step()
-
+            gl += g_loss.data.cpu().numpy()
+            g_count += 1
             writer.add_scalars('G',
                                {"g_loss": g_loss.data.cpu().numpy()},
                                global_step=step)
@@ -150,6 +154,8 @@ for epoch in range(start_epoch, epochs):
             utils.mkdir(save_dir)
             torchvision.utils.save_image(f_imgs_sample, '%s/Epoch_(%d)_(%dof%d).jpg' % (save_dir, epoch, i + 1, len(data_loader)), nrow=10)
 
+
+    print("Epoch {} - D Loss : {} - G Loss : {}".format(epoch, int(dl / d_count), int(gl / g_count)))
     utils.save_checkpoint({'epoch': epoch + 1,
                            'D': D.state_dict(),
                            'G': G.state_dict(),
