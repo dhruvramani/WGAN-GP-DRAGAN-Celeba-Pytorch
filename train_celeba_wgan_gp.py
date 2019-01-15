@@ -56,7 +56,7 @@ transform = transforms.Compose(
      transforms.ToTensor(),
      transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3)])
 
-imagenet_data = dsets.ImageFolder('./data/img_align_celeba', transform=transform)
+imagenet_data = dsets.ImageFolder('/home/nevronas/dataset/img_align_celeba', transform=transform)
 data_loader = torch.utils.data.DataLoader(imagenet_data,
                                           batch_size=batch_size,
                                           shuffle=True,
@@ -109,10 +109,10 @@ for epoch in range(start_epoch, epochs):
         f_imgs = G(z)
 
         # train D
-        r_logit = D(imgs)
-        f_logit = D(f_imgs.detach())
+        r_logit = D(imgs)            # f(x)
+        f_logit = D(f_imgs.detach()) # f(G(z))
 
-        wd = r_logit.mean() - f_logit.mean()  # Wasserstein-1 Distance
+        wd = r_logit.mean() - f_logit.mean()  # Wasserstein-1 Distance 
         gp = gradient_penalty(imgs.data, f_imgs.data, D)
         d_loss = -wd + gp * 10.0
 
