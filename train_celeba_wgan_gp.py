@@ -105,7 +105,6 @@ for epoch in range(start_epoch, epochs):
         imgs = Variable(imgs)
         bs = imgs.size(0)
         z = Variable(torch.randn(bs, z_dim))
-        print(imgs, z)
         imgs, z = utils.cuda([imgs, z])
 
         f_imgs = G(z)
@@ -141,8 +140,7 @@ for epoch in range(start_epoch, epochs):
                                {"g_loss": g_loss.data.cpu().numpy()},
                                global_step=step)
 
-        if (i + 1) % 1 == 0:
-            print("Epoch: (%3d) (%5d/%5d)" % (epoch, i + 1, len(data_loader)))
+            print("Epoch: (%3d) (%5d/%5d) - D Loss : (%d) - G Loss : (%d)" % (epoch, i + 1, len(data_loader), d_loss.data.cpu().numpy(), g_loss.data.cpu().numpy()), end="\r")
 
         if (i + 1) % 100 == 0:
             G.eval()
